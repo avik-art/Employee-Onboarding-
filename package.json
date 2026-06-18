@@ -1,0 +1,10 @@
+{
+  "name": "healthy-mind-onboarding",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Healthy Mind by Avik — Employee Onboarding Portal (Vercel + Google Sheets/Drive)",
+  "dependencies": {
+    "googleapis": "^140.0.1",
+    "pdf-lib": "^1.17.1"
+  }
+}

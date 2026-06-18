@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{
+    --cream:#faf7f0;--white:#fff;--ink:#16201b;--muted:#5c6660;--subtle:#79847d;
+    --pine:#095d40;--pine-800:#073b2c;--pine-900:#042e22;--pine-50:#ecf3ee;--pine-100:#dceae2;
+    --leaf:#7cb041;--leaf-600:#6ba336;--leaf-700:#5c9130;--leaf-50:#f1f7e8;--leaf-100:#e6f0d6;--leaf-300:#b3d489;
+    --b-sub:#e3e7e2;--b-def:#cbd2cc;--gray-50:#f6f8f4;--gray-100:#eef1ec;
+    --clay:#c75d4f;
+    --font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --serif:'Lora',Georgia,serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--ink);background:linear-gradient(180deg,var(--pine-50),var(--cream) 38%);min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;padding:26px 18px 60px}
+  h1{font-weight:800;letter-spacing:-.02em;margin:0}
+  .muted{color:var(--muted)} .subtle{color:var(--subtle)}
+  .mono{font-family:var(--mono);font-size:11.5px;color:var(--subtle)}
+  .over{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--leaf-700)}
+  .card{background:var(--white);border:1px solid var(--b-sub);border-radius:20px;padding:18px;box-shadow:0 2px 6px rgba(4,46,34,.07)}
+  .card.flat{box-shadow:none}
+  .card.accent{position:relative;overflow:hidden;padding-left:22px}
+  .card.accent::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--leaf)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;font-family:var(--font);font-weight:600;
+    border:0;border-radius:999px;cursor:pointer;padding:0 24px;min-height:50px;font-size:16px;transition:.18s}
+  .btn.block{display:flex;width:100%}
+  .btn.primary{background:var(--pine);color:#fff}.btn.primary:hover{background:var(--pine-800)}
+  .btn.secondary{background:#fff;color:var(--pine);border:1.5px solid var(--b-def)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .hero{position:relative;overflow:hidden;background:var(--pine-800);border-radius:28px;padding:32px 26px;color:#fff}
+  .hero .leaf{position:absolute;right:-30px;top:-26px;width:180px;opacity:.12}
+  .num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--leaf-100);color:var(--leaf-700);
+    font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+  .row{display:flex;gap:13px;align-items:center}
+  .steps{display:flex;align-items:flex-start;margin:6px 0 24px}
+  .step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+  .step .node{width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--b-def);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--subtle);z-index:1}
+  .step .bar{position:absolute;top:16px;left:50%;right:-50%;height:3px;background:var(--b-def)}
+  .step:last-child .bar{display:none}
+  .step.done .node{background:var(--leaf);border-color:var(--leaf);color:#fff}
+  .step.done .bar{background:var(--leaf)}
+  .step.cur .node{background:var(--pine);border-color:var(--pine);color:#fff;box-shadow:0 0 0 5px var(--pine-100)}
+  .step small{margin-top:7px;font-size:11px;font-weight:600;color:var(--muted);text-align:center}
+  .step.cur small{color:var(--pine)}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px}
+  .badge.ok{background:var(--leaf-50);color:var(--leaf-700)} .badge.pine{background:var(--pine-100);color:var(--pine)}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .prose{font-family:var(--serif);font-size:16px;line-height:1.7;color:#283129}
+  .prose p{margin:0 0 1em}
+  .tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:12px;margin-bottom:12px}
+  .tabs button{flex:1;border:0;background:none;padding:9px 0;border-radius:9px;font-family:var(--font);font-weight:600;cursor:pointer;color:var(--muted)}
+  .tabs button.on{background:#fff;color:var(--pine);box-shadow:0 1px 2px rgba(4,46,34,.08)}
+  #pad{width:100%;height:140px;border:1.5px dashed var(--b-def);border-radius:14px;background:var(--gray-50);touch-action:none;display:block}
+  .typed{width:100%;border:1.5px solid var(--b-def);border-radius:14px;padding:14px 16px;font-family:var(--serif);font-size:28px;color:var(--pine);background:var(--gray-50)}
+  .check{width:24px;height:24px;border-radius:7px;border:2px solid var(--b-def);display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .check.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+  a.link{color:var(--pine);font-weight:600;text-decoration:none;cursor:pointer}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:s 0.7s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--pine-900);color:#fff;
+    padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 16px 40px rgba(4,46,34,.3);opacity:0;transition:.25s;z-index:99}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+  var google={script:{run:(function(){
+    function build(succ,fail){return new Proxy({},{get:function(_,name){
+      if(name==='withSuccessHandler')return function(f){return build(f,fail)};
+      if(name==='withFailureHandler')return function(f){return build(succ,f)};
+      return function(){var a=[].slice.call(arguments);
+        fetch('/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:name,args:a})})
+        .then(function(r){return r.json()}).then(function(j){if(j.error){if(fail)fail(new Error(j.error))}else{if(succ)succ(j.result)}})
+        .catch(function(e){if(fail)fail(e)});};
+    }});}
+    return build(null,null);
+  })()}};
+  var BOOT={};
+  var state = { screen:'welcome', openDoc:null, signed:[], agreed:[], sig:null,
+    details:{pan:'',aadhaar:'',bankName:'',accName:'',accNo:'',ifsc:'',panUploaded:false,aadhaarUploaded:false} };
+  var app = document.getElementById('app');
+  var LEAF = 'https://drive.google.com/uc?id='; // (decorative; replaced by inline data below if desired)
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function fill(s){
+    var c=BOOT.candidate||{};
+    var map={company:BOOT.company||'the Company',name:c.name||'',firstName:c.firstName||(c.name||'').split(' ')[0]||'',
+      role:c.role||'',joining:c.joining||'',email:c.email||'',date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})};
+    return String(s==null?'':s).replace(/\{\{(\w+)\}\}/g,function(m,k){return map[k]!=null?map[k]:m});
+  }
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
+
+  function collectDetails(){return BOOT.collectDetails!==false}
+  function stepLabels(){return collectDetails()?['Sign documents','Your details','Agree to policies','All done']:['Sign documents','Agree to policies','All done']}
+  function polIndex(){return collectDetails()?2:1}
+  function stepsBar(cur){
+    var labels=stepLabels();
+    return '<div class="steps">'+labels.map(function(l,i){
+      var st=cur>i?'done':cur===i?'cur':'';
+      return '<div class="step '+st+'"><span class="node">'+(cur>i?'\u2713':(i+1))+'</span><small>'+l+'</small><span class="bar"></span></div>';
+    }).join('')+'</div>';
+  }
+
+  function render(){
+    if(state.screen==='welcome') return welcome();
+    if(state.screen==='docs') return docs();
+    if(state.screen==='sign') return signDoc();
+    if(state.screen==='details') return details();
+    if(state.screen==='policies') return policies();
+    return done();
+  }
+
+  function welcome(){
+    var c=BOOT.candidate;
+    app.innerHTML =
+      '<div class="hero"><img class="leaf" src="data:image/svg+xml;utf8,'+leafSvg()+'">'+
+      '<div class="over" style="color:var(--leaf-300)">Your onboarding</div>'+
+      '<h1 style="color:#fff;font-size:30px;margin-top:8px">Welcome, '+esc(c.firstName)+' \uD83C\uDF3F</h1>'+
+      '<p style="color:rgba(255,255,255,.82);margin-top:10px;line-height:1.55">We\u2019re so glad you\u2019re joining us. Let\u2019s get your paperwork done — it takes about 15 minutes, and your progress saves as you go.</p></div>'+
+      '<div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">'+
+        step3('1','Read & sign '+BOOT.documents.length+' documents','Offer letter, NDA, and more.')+
+        (collectDetails()?step3('2','Share your details','Upload PAN & Aadhaar, add bank details.'):'')+
+        step3(collectDetails()?'3':'2','Agree to company policies','A quick read and a tick for each.')+
+        step3(collectDetails()?'4':'3','You\u2019re all set','We\u2019ll email you signed copies.')+
+      '</div>'+
+      '<button class="btn primary block" style="margin-top:20px" onclick="go(\'docs\')">Get started &rarr;</button>'+
+      '<p class="mono" style="text-align:center;margin-top:14px">\uD83D\uDD12 Secure link for '+esc(c.email)+'</p>';
+  }
+  function step3(n,t,s){return '<div class="card flat row"><span class="num">'+n+'</span><span><b>'+esc(t)+'</b><br><span class="muted" style="font-size:13.5px">'+esc(s)+'</span></span></div>'}
+
+  function docs(){
+    var done=state.signed.length, total=BOOT.documents.length, all=done>=total;
+    var items=BOOT.documents.map(function(d){
+      var s=state.signed.indexOf(d)>=0;
+      var es=(BOOT.esignDocs||[]).indexOf(d)>=0;
+      return '<div class="card '+(s?'':'accent')+' row" style="cursor:pointer;margin-bottom:10px" onclick="openDoc(\''+esc(d)+'\')">'+
+        '<span class="num" style="border-radius:11px;'+(s?'background:var(--leaf);color:#fff':'')+'">'+(s?'\u2713':'\uD83D\uDCC4')+'</span>'+
+        '<span style="flex:1"><b>'+esc(d)+'</b>'+(es&&!s?'<br><span class="mono" style="color:var(--pine)">\uD83D\uDD10 Aadhaar eSign</span>':'')+'</span>'+
+        (s?'<span class="badge ok"><span class="dot"></span>Signed</span>':'<span style="color:var(--pine);font-weight:700;font-size:20px">&rarr;</span>')+
+      '</div>';
+    }).join('');
+    app.innerHTML = stepsBar(0)+
+      '<h1 style="font-size:26px">Sign your documents</h1>'+
+      '<p class="muted" style="margin:8px 0 16px">Read each one, add your signature, and submit. Take your time.</p>'+
+      '<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="mono">'+done+' of '+total+' signed</span>'+
+        '<span class="badge '+(all?'ok':'pine')+'">'+(all?'All signed':(total-done)+' left')+'</span></div>'+
+      items+
+      '<button class="btn primary block" style="margin-top:14px" '+(all?'':'disabled')+' onclick="go(\''+(collectDetails()?'details':'policies')+'\')">'+
+        (all?(collectDetails()?'Continue to your details':'Continue to policies'):'Sign all documents to continue')+'</button>';
+  }
+
+  function signDoc(){
+    var d=state.openDoc; state.sig=null;
+    var es=(BOOT.esignDocs||[]).indexOf(d)>=0;
+    var c=(BOOT.content&&BOOT.content.documents&&BOOT.content.documents[d])||null;
+    var prose=c?((c.intro?'<p>'+esc(fill(c.intro))+'</p>':'')+(c.sections||[]).map(function(s){
+      return '<p><b>'+esc(fill(s.h))+'</b><br>'+esc(fill(s.p))+'</p>'}).join(''))
+      :'<p>Please read this document carefully. By signing below you confirm that you have read and accept it.</p>';
+    var signBlock = es
+      ? '<div class="card" style="margin-top:18px;border:1.5px solid var(--pine-200);background:var(--pine-50)">'+
+          '<div class="row" style="align-items:flex-start;gap:12px"><span style="font-size:22px">\uD83D\uDD10</span>'+
+          '<span><b style="font-size:15px;color:var(--pine-800)">Secure legal signature</b>'+
+          '<br><span style="font-size:14px;color:var(--pine-800)">This document is signed with Aadhaar eSign via Leegality — legally binding and tamper-evident. You\u2019ll verify with an OTP.</span></span></div>'+
+          '<button class="btn primary block" id="esbtn" style="margin-top:14px" onclick="startEsign()">Continue to secure signing</button>'+
+          '<div id="esafter"></div></div>'
+      : '<h3 style="margin:20px 0 4px">Your signature</h3>'+
+        '<p class="muted" style="margin:0 0 12px;font-size:14px">Draw it or type your name — either works.</p>'+
+        '<div class="tabs"><button id="t-draw" class="on" onclick="mode(\'draw\')">Draw</button><button id="t-type" onclick="mode(\'type\')">Type</button></div>'+
+        '<div id="sigarea"></div>'+
+        '<button class="btn primary block" id="submit" style="margin-top:18px" onclick="submitSig()">Sign &amp; submit</button>';
+    app.innerHTML =
+      '<a class="link" onclick="go(\'docs\')">&larr; All documents</a>'+
+      '<h1 style="font-size:24px;margin-top:14px">'+esc(d)+'</h1>'+
+      '<p class="mono" style="margin-top:6px">To be signed by '+esc(BOOT.candidate.name)+(es?' · Aadhaar eSign':'')+'</p>'+
+      '<button class="btn secondary block" style="margin-top:14px" onclick="openPdf()">📄 View full document (PDF)</button>'+
+      '<div class="card flat" style="margin-top:12px;max-height:200px;overflow:auto;background:var(--gray-50)">'+
+        '<div class="prose" style="font-size:15px">'+prose+'</div></div>'+
+      signBlock;
+    if(!es)mode('draw');
+    grun('candidateLogView',[BOOT.token,d]);
+  }
+
+  function openPdf(){
+    var d=state.openDoc;
+    var ov=document.getElementById('pdfov');
+    if(!ov){ov=document.createElement('div');ov.id='pdfov';document.body.appendChild(ov);}
+    ov.style.cssText='position:fixed;inset:0;z-index:200;background:rgba(4,46,34,.55);display:flex;flex-direction:column;padding:14px';
+    ov.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;color:#fff;padding:6px 4px 10px">'+
+      '<b style="font-family:var(--font);font-size:15px">'+esc(d)+'</b>'+
+      '<button onclick="closePdf()" style="background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:999px;width:34px;height:34px;font-size:18px;cursor:pointer">✕</button></div>'+
+      '<div id="pdfbox" style="flex:1;background:#fff;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">'+
+      '<span class="mono" style="color:var(--subtle)">Preparing your document…</span></div>';
+    google.script.run.withSuccessHandler(function(dataUrl){
+      var box=document.getElementById('pdfbox'); if(!box) return;
+      try{
+        var b64=dataUrl.split(',')[1];var bin=atob(b64);var arr=new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+        var url=URL.createObjectURL(new Blob([arr],{type:'application/pdf'}));
+        box.innerHTML='<iframe src="'+url+'" style="width:100%;height:100%;border:0"></iframe>';
+      }catch(e){
+        box.innerHTML='<div style="text-align:center;padding:20px"><p class="muted">Couldn\u2019t embed the PDF here.</p>'+
+          '<a class="btn primary" target="_blank" href="'+dataUrl+'">Open PDF</a></div>';
+      }
+    }).withFailureHandler(function(e){var box=document.getElementById('pdfbox');if(box)box.innerHTML='<span class="muted" style="padding:20px">'+(e.message||'Could not load PDF')+'</span>';})
+    .candidatePreviewPdf(BOOT.token,d);
+  }
+  function closePdf(){var ov=document.getElementById('pdfov');if(ov)ov.remove();}
+
+  function startEsign(){
+    var d=state.openDoc;var b=document.getElementById('esbtn');b.disabled=true;b.innerHTML='<span class="spin"></span> Preparing…';
+    google.script.run.withSuccessHandler(function(r){
+      b.style.display='none';
+      window.open(r.signUrl,'_blank');
+      document.getElementById('esafter').innerHTML=
+        '<p style="font-size:14px;color:var(--pine-800);margin:14px 0 10px">A secure Leegality signing window has opened. Complete it there, then come back.</p>'+
+        '<button class="btn secondary block" onclick="checkEsign()">I\u2019ve finished signing</button>';
+    }).withFailureHandler(function(e){b.disabled=false;b.textContent='Continue to secure signing';toast(e.message||'Could not start eSign')})
+    .candidateStartEsign(BOOT.token,d);
+  }
+  function checkEsign(){
+    var d=state.openDoc;
+    google.script.run.withSuccessHandler(function(st){
+      if(st==='signed'){if(state.signed.indexOf(d)<0)state.signed.push(d);toast('Signed via Aadhaar eSign');go('docs');}
+      else toast('Not completed yet — finish in the Leegality window, then tap again.');
+    }).withFailureHandler(function(e){toast(e.message||'Error')}).candidateEsignStatus(BOOT.token,d);
+  }
+
+  var _draw=false,_ink=false,_ctx=null;
+  function mode(m){
+    document.getElementById('t-draw').className=m==='draw'?'on':'';
+    document.getElementById('t-type').className=m==='type'?'on':'';
+    var a=document.getElementById('sigarea');
+    if(m==='draw'){
+      a.innerHTML='<canvas id="pad"></canvas><a class="link" style="font-size:13px;display:inline-block;margin-top:8px" onclick="clearPad()">Clear</a>';
+      var cv=document.getElementById('pad');var r=cv.getBoundingClientRect();var dp=window.devicePixelRatio||1;
+      cv.width=r.width*dp;cv.height=r.height*dp;_ctx=cv.getContext('2d');_ctx.scale(dp,dp);
+      _ctx.strokeStyle='#095d40';_ctx.lineWidth=2.4;_ctx.lineCap='round';_ctx.lineJoin='round';_ink=false;
+      var pos=function(e){var b=cv.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return{x:t.clientX-b.left,y:t.clientY-b.top}};
+      var dn=function(e){e.preventDefault();_draw=true;var p=pos(e);_ctx.beginPath();_ctx.moveTo(p.x,p.y)};
+      var mv=function(e){if(!_draw)return;e.preventDefault();var p=pos(e);_ctx.lineTo(p.x,p.y);_ctx.stroke();_ink=true;
+        state.sig={type:'drawn',value:cv.toDataURL('image/png')}};
+      var up=function(){_draw=false};
+      cv.onmousedown=dn;cv.onmousemove=mv;cv.onmouseup=up;cv.onmouseleave=up;
+      cv.ontouchstart=dn;cv.ontouchmove=mv;cv.ontouchend=up;
+    } else {
+      a.innerHTML='<input class="typed" placeholder="'+esc(BOOT.candidate.name)+'" oninput="state.sig=this.value?{type:\'typed\',value:this.value}:null">'+
+        '<p class="mono" style="margin-top:8px">This typed name is your legal electronic signature.</p>';
+    }
+  }
+  function clearPad(){var cv=document.getElementById('pad');if(cv){_ctx.clearRect(0,0,cv.width,cv.height);}_ink=false;state.sig=null}
+
+  function submitSig(){
+    if(!state.sig){toast('Add your signature to continue');return}
+    var b=document.getElementById('submit');b.disabled=true;b.innerHTML='<span class="spin"></span> Saving…';
+    google.script.run.withSuccessHandler(function(){
+      if(state.signed.indexOf(state.openDoc)<0)state.signed.push(state.openDoc);
+      toast('Signed & saved');go('docs');
+    }).withFailureHandler(function(err){b.disabled=false;b.textContent='Sign & submit';toast(err.message||'Something went wrong')})
+    .candidateSignDocument(BOOT.token,state.openDoc,state.sig);
+  }
+
+  function policies(){
+    var done=state.agreed.length,total=BOOT.policies.length,all=done>=total;
+    var items=BOOT.policies.map(function(p){
+      var ok=state.agreed.indexOf(p)>=0;
+      var pc=(BOOT.content&&BOOT.content.policies&&BOOT.content.policies[p])||{};
+      return '<div class="card flat" style="margin-bottom:10px;'+(ok?'background:var(--leaf-50)':'')+'">'+
+        '<div class="row" style="align-items:flex-start"><span style="flex:1"><b>'+esc(p)+'</b>'+
+        '<br><span class="muted" style="font-size:13.5px">'+esc(pc.summary||'Read and acknowledge to continue.')+'</span></span>'+
+        (ok?'<span class="badge ok"><span class="dot"></span>Agreed</span>':'')+'</div>'+
+        (pc.body?'<p class="prose" style="font-size:14.5px;margin:12px 0 0">'+esc(fill(pc.body))+'</p>':'')+
+        (ok?'':'<label class="row" style="margin-top:12px;cursor:pointer" onclick="agree(\''+esc(p)+'\')"><span class="check"></span>'+
+          '<span style="font-size:14.5px">I have read and agree to the '+esc(p)+'</span></label>')+
+      '</div>';
+    }).join('');
+    app.innerHTML = stepsBar(polIndex())+
+      '<h1 style="font-size:26px">Company policies</h1>'+
+      '<p class="muted" style="margin:8px 0 16px">Have a read, then tick to agree. No signature needed here.</p>'+
+      '<p class="mono" style="margin-bottom:10px">'+done+' of '+total+' agreed</p>'+items+
+      '<div class="row" style="margin-top:14px;gap:10px"><button class="btn secondary" onclick="go(\''+(collectDetails()?'details':'docs')+'\')">Back</button>'+
+      '<button class="btn primary block" '+(all?'':'disabled')+' onclick="finish()">Agree &amp; finish</button></div>';
+  }
+  function agree(p){
+    google.script.run.withSuccessHandler(function(){
+      if(state.agreed.indexOf(p)<0)state.agreed.push(p);policies();
+    }).withFailureHandler(function(e){toast(e.message||'Error')}).candidateAgreePolicy(BOOT.token,p);
+  }
+  function finish(){
+    google.script.run.withSuccessHandler(function(){go('done')})
+      .withFailureHandler(function(e){toast(e.message||'Error')}).candidateComplete(BOOT.token);
+  }
+
+  /* ---------- screen: your details (KYC + bank) ---------- */
+  function details(){
+    var d=state.details;
+    function tile(kind,label,hint){
+      var up=d[kind+'Uploaded'];
+      return '<div class="card flat" style="margin-bottom:10px;'+(up?'background:var(--leaf-50)':'')+'">'+
+        '<div class="row" style="gap:12px"><span class="num" style="border-radius:11px;'+(up?'background:var(--leaf);color:#fff':'background:var(--pine-100);color:var(--pine)')+'">'+(up?'\u2713':'\uD83D\uDCF7')+'</span>'+
+        '<span style="flex:1"><b>'+label+'</b><br><span class="muted" style="font-size:13px">'+(up?'Uploaded \u2014 tap to replace':hint)+'</span></span>'+
+        '<span id="sp-'+kind+'"></span></div>'+
+        '<input type="file" id="f-'+kind+'" accept="image/*,application/pdf" capture="environment" style="display:none" onchange="onKyc(\''+kind+'\',this)">'+
+        '<button class="btn secondary block" style="margin-top:12px" onclick="document.getElementById(\'f-'+kind+'\').click()">'+(up?'Replace photo / file':'Take photo or upload')+'</button>'+
+      '</div>';
+    }
+    app.innerHTML = stepsBar(1)+
+      '<h1 style="font-size:26px">Your details</h1>'+
+      '<p class="muted" style="margin:8px 0 18px">Upload your identity documents and add the bank account where you\u2019ll be paid. Your details are encrypted in transit and visible only to HR.</p>'+
+      '<div class="over">Identity documents</div>'+
+      tile('pan','PAN card','Photo or PDF of your PAN card')+
+      tile('aadhaar','Aadhaar card','Photo or PDF (front & back if needed)')+
+      '<div style="display:flex;gap:10px;margin-top:6px">'+
+        fieldEl('pan','PAN number','ABCDE1234F',d.pan,'text-transform:uppercase')+
+        fieldEl('aadhaar','Aadhaar number','1234 5678 9012',d.aadhaar,'')+'</div>'+
+      '<div class="over" style="margin-top:22px">Bank details</div>'+
+      fieldEl('accName','Account holder name','As per your bank',d.accName,'')+
+      '<div style="margin-top:10px">'+fieldEl('bankName','Bank name','e.g. HDFC Bank',d.bankName,'')+'</div>'+
+      '<div style="display:flex;gap:10px;margin-top:10px">'+
+        fieldEl('accNo','Account number','',d.accNo,'')+
+        fieldEl('ifsc','IFSC code','ABCD0123456',d.ifsc,'text-transform:uppercase')+'</div>'+
+      '<div class="row" style="margin-top:20px;gap:10px"><button class="btn secondary" onclick="go(\'docs\')">Back</button>'+
+      '<button class="btn primary block" id="dsave" onclick="saveDetails()">Save &amp; continue</button></div>';
+  }
+  function fieldEl(key,label,ph,val,extra){
+    return '<div class="field" style="flex:1;display:flex;flex-direction:column;gap:6px"><label style="font-size:13px;font-weight:600;color:var(--ink)">'+label+'</label>'+
+      '<input id="d-'+key+'" value="'+esc(val||'')+'" placeholder="'+esc(ph)+'" oninput="state.details.'+key+'=this.value" '+
+      'style="box-sizing:border-box;width:100%;font-family:var(--font);font-size:15px;border:1.5px solid var(--b-def);border-radius:12px;padding:11px 13px;'+extra+'"></div>';
+  }
+  function shrink(file,cb){
+    if(/pdf/i.test(file.type)){var fr=new FileReader();fr.onload=function(){cb(fr.result.split(',')[1],file.type)};fr.readAsDataURL(file);return;}
+    var fr=new FileReader();fr.onload=function(){
+      var img=new Image();img.onload=function(){
+        var max=1600,w=img.width,h=img.height;if(w>max||h>max){var r=Math.min(max/w,max/h);w=Math.round(w*r);h=Math.round(h*r);}
+        var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+        cb(cv.toDataURL('image/jpeg',0.82).split(',')[1],'image/jpeg');
+      };img.src=fr.result;
+    };fr.readAsDataURL(file);
+  }
+  function onKyc(kind,input){
+    var file=input.files&&input.files[0];if(!file)return;
+    var sp=document.getElementById('sp-'+kind);sp.innerHTML='<span class="spin" style="border-top-color:var(--pine);border-color:var(--pine-100)"></span>';
+    shrink(file,function(b64,mime){
+      google.script.run.withSuccessHandler(function(){
+        state.details[kind+'Uploaded']=true;toast((kind==='pan'?'PAN':'Aadhaar')+' uploaded');details();
+      }).withFailureHandler(function(e){sp.innerHTML='';toast(e.message||'Upload failed')})
+      .candidateUploadKyc(BOOT.token,kind,b64,mime);
+    });
+  }
+  function saveDetails(){
+    var d=state.details;
+    if(!d.panUploaded||!d.aadhaarUploaded){toast('Please upload both PAN and Aadhaar');return;}
+    if(!d.accName||!d.accNo||!d.ifsc){toast('Please fill account name, number and IFSC');return;}
+    var b=document.getElementById('dsave');b.disabled=true;b.innerHTML='<span class="spin"></span> Saving…';
+    google.script.run.withSuccessHandler(function(){toast('Details saved');go('policies')})
+      .withFailureHandler(function(e){b.disabled=false;b.textContent='Save & continue';toast(e.message||'Error')})
+      .candidateSaveDetails(BOOT.token,{pan:d.pan,aadhaar:d.aadhaar,bankName:d.bankName,accName:d.accName,accNo:d.accNo,ifsc:d.ifsc});
+  }
+
+  function done(){
+    var c=BOOT.candidate;
+    app.innerHTML =
+      '<div class="hero" style="text-align:center;padding:40px 26px"><img class="leaf" src="data:image/svg+xml;utf8,'+leafSvg()+'" style="left:-26px;bottom:-26px;top:auto;right:auto">'+
+      '<div style="width:66px;height:66px;border-radius:50%;background:var(--leaf);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(124,176,65,.18);font-size:30px;color:#fff">\u2713</div>'+
+      '<h1 style="color:#fff;font-size:28px;margin-top:18px">You\u2019re all set \uD83C\uDF3F</h1>'+
+      '<p style="color:rgba(255,255,255,.85);margin-top:10px">Welcome to the team, '+esc(c.firstName)+'. We can\u2019t wait to work with you.</p></div>'+
+      '<div class="card" style="margin-top:16px">'+
+        rowDone(BOOT.documents.length+' documents signed','Signed copies saved to your folder')+
+        rowDone(BOOT.policies.length+' policies agreed','Recorded with a timestamp')+
+        rowDone('Saved to Google Drive'+(BOOT.zoho?' & Zoho WorkDrive':''),'In your personal onboarding folder')+
+      '</div>'+
+      '<div id="dls" style="margin-top:16px"><div class="card flat" style="text-align:center"><span class="mono">Preparing your signed copies…</span></div></div>';
+    loadDownloads();
+  }
+  function loadDownloads(){
+    google.script.run.withSuccessHandler(function(files){
+      var box=document.getElementById('dls'); if(!box) return;
+      if(!files||!files.length){box.innerHTML='';return;}
+      // Offer Letter first, then the rest
+      files.sort(function(a,b){return (/offer/i.test(b.name)?1:0)-(/offer/i.test(a.name)?1:0)});
+      box.innerHTML='<h3 style="font-size:16px;margin:4px 0 10px">Download your signed documents</h3>'+
+        files.map(function(f){
+          var offer=/offer/i.test(f.name);
+          return '<a href="'+esc(f.url)+'" target="_blank" class="card flat row" style="text-decoration:none;margin-bottom:8px;'+(offer?'background:var(--leaf-50)':'')+'">'+
+            '<span class="num" style="width:34px;height:34px;border-radius:10px;background:var(--leaf-100);color:var(--leaf-700)">PDF</span>'+
+            '<span style="flex:1;color:var(--ink)"><b style="font-size:14.5px">'+esc(f.name.replace(/ — signed.*$/,''))+'</b>'+(offer?'<br><span class="mono" style="color:var(--leaf-700)">Your offer letter</span>':'')+'</span>'+
+            '<span style="color:var(--pine);font-weight:700">Download \u2193</span></a>';
+        }).join('')+
+        '<p class="mono" style="margin-top:6px">A copy was also emailed to '+esc(BOOT.candidate.email)+'.</p>';
+    }).withFailureHandler(function(){var box=document.getElementById('dls');if(box)box.innerHTML='';})
+    .candidateMyFiles(BOOT.token);
+  }
+  function rowDone(t,s){return '<div class="row" style="padding:9px 0"><span class="num" style="width:26px;height:26px;background:var(--leaf-100);color:var(--leaf-700)">\u2713</span><span><b style="font-size:15px">'+esc(t)+'</b><br><span class="mono">'+esc(s)+'</span></span></div>'}
+
+  function leafSvg(){return encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 78 C26 50 44 30 78 24 C74 54 60 74 30 78 Z" fill="%237cb041"/></svg>')}
+
+  function openDoc(d){state.openDoc=d;go('sign')}
+  function go(s){state.screen=s;window.scrollTo(0,0);render()}
+  function grun(fn,args){var r=google.script.run.withFailureHandler(function(){});r[fn].apply(r,args)}
+  (function(){
+    var token=new URLSearchParams(location.search).get('token')||'';
+    if(!token){ location.replace('/admin'); return; }
+    fetch('/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'getCandidateBoot',args:[token]})})
+      .then(function(r){return r.json()}).then(function(j){
+        if(j.error){document.getElementById('app').innerHTML='<div class="card" style="margin-top:48px;text-align:center"><h2>'+j.error+'</h2><p class="muted">Ask your HR contact for a fresh link.</p></div>';return;}
+        BOOT=j.result; state.signed=(BOOT.signed||[]).slice(); state.agreed=(BOOT.agreed||[]).slice();
+        state.details=Object.assign(state.details,BOOT.savedDetails||{}); render();
+      }).catch(function(e){document.getElementById('app').innerHTML='<div class="card" style="margin-top:48px;text-align:center"><h2>Unable to load. Please retry.</h2></div>';});
+  })();
+</script>
+</body>
+</html>
